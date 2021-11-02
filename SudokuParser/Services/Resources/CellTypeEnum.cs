@@ -1,5 +1,4 @@
-﻿using System;
-namespace SudokuService.Services
+﻿namespace SudokuService.Services
 {
     public enum CellTypeEnum
     {

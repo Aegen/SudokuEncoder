@@ -20,13 +20,14 @@ namespace SudokuService.Services
             var binaryStringBuilder = new StringBuilder();
 
             // Add max jump section
-            binaryStringBuilder.Append(PadToSize(IntToBinaryString(longestJumpBits), 3));
+            binaryStringBuilder.Append(PadBinaryToSize(IntToBinaryString(longestJumpBits), 3));
 
             // Add chain bit for first value
             if (tokens[0].Type == CellTypeEnum.EMPTY)
             {
                 binaryStringBuilder.Append('0');
-            } else
+            }
+            else
             {
                 binaryStringBuilder.Append('1');
             }
@@ -47,20 +48,20 @@ namespace SudokuService.Services
             {
                 for (var i = 0; i < token.Values.Count - 1; i++)
                 {
-                    var valueBits = PadToSize(IntToBinaryString(token.Values[i]), 4);
+                    var valueBits = PadBinaryToSize(IntToBinaryString(token.Values[i]), 4);
 
                     bitString.Append(valueBits);
                     bitString.Append('1');
                 }
 
-                var finalValueBits = PadToSize(IntToBinaryString(token.Values[^1]), 4);
+                var finalValueBits = PadBinaryToSize(IntToBinaryString(token.Values[^1]), 4);
 
                 bitString.Append(finalValueBits);
                 bitString.Append('0');
             }
             else if (token.Type == CellTypeEnum.EMPTY)
             {
-                var valueBits = PadToSize(IntToBinaryString(token.Size - 1), longestJumpBits);
+                var valueBits = PadBinaryToSize(IntToBinaryString(token.Length - 1), longestJumpBits);
                 bitString.Append(valueBits);
             }
 
@@ -83,7 +84,7 @@ namespace SudokuService.Services
                 if (newestIsland.Type == GetCellType(grid[index]))
                 {
                     newestIsland.Values.Add(grid[index]);
-                    newestIsland.Size++;
+                    newestIsland.Length++;
                 }
                 else
                 {
@@ -96,31 +97,27 @@ namespace SudokuService.Services
 
         private static Token CreateIslandToken(int cellValue, int index)
         {
-            var token = new Token
+            return new Token
             {
                 StartIndex = index,
-                Size = 1,
-                Values = new List<int>(),
+                Length = 1,
+                Values = new List<int> { cellValue },
                 Type = GetCellType(cellValue)
             };
-
-            token.Values.Add(cellValue);
-
-            return token;
         }
 
         private static CellTypeEnum GetCellType(int cellValue) => (cellValue == 0) ? CellTypeEnum.EMPTY : CellTypeEnum.VALUE;
 
         private static int GetLongestJumpBits(List<Token> tokens) => tokens
                 .Where(token => token.Type == CellTypeEnum.EMPTY)
-                .Select(token => GetNumBitsToRepresent(token.Size))
+                .Select(token => GetNumBitsToStore(token.Length))
                 .Max();
 
-        private static int GetNumBitsToRepresent(int size) => (int)Math.Ceiling(Math.Log2(size));
+        private static int GetNumBitsToStore(int size) => (int)Math.Ceiling(Math.Log2(size));
 
         private static String IntToBinaryString(int value) => Convert.ToString(value, 2);
 
-        private static String PadToSize(String binary, int size)
+        private static String PadBinaryToSize(String binary, int size)
         {
             if (binary.Length > size)
                 throw new ArgumentOutOfRangeException(nameof(size), "The requested size is smaller than the input length");

@@ -12,6 +12,8 @@
     <None Remove="Microsoft.AspNet.WebApi.Cors" />
     <None Remove="Services\" />
     <None Remove="Constants\" />
+    <None Remove="Services\Resources\" />
+    <None Remove="Controllers\Utilities\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="DTOs\" />
@@ -19,6 +21,8 @@
     <Folder Include="DTOs\Responses\" />
     <Folder Include="Services\" />
     <Folder Include="Constants\" />
+    <Folder Include="Services\Resources\" />
+    <Folder Include="Controllers\Utilities\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNet.WebApi.Cors" Version="5.2.7" />
