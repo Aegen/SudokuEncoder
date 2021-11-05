@@ -27,11 +27,16 @@ namespace SudokuService.Controllers
             {
                 grid = encodeRequestDTO.grid,
                 binary = binaryString,
-                code = code
+                code = RemoveExtraCharacters(code, binaryString.Length)
             };
         }
 
-        
+        public static String RemoveExtraCharacters(String code, int binaryStringLength)
+        {
+            var neededLength = (int)Math.Ceiling(binaryStringLength / 6.0);
+
+            return code.Substring(0, neededLength);
+        }
 
     }
 }

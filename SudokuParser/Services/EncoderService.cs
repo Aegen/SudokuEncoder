@@ -7,11 +7,6 @@ namespace SudokuService.Services
 {
     public class EncoderService
     {
-        public EncoderService()
-        {
-
-        }
-
         public String EncodeGrid(List<int> grid)
         {
             var tokens = TokenizeGrid(grid);
@@ -54,7 +49,7 @@ namespace SudokuService.Services
                     bitString.Append('1');
                 }
 
-                var finalValueBits = PadBinaryToSize(IntToBinaryString(token.Values[^1]), 4);
+                var finalValueBits = PadBinaryToSize(IntToBinaryString(token.Values.Last()), 4);
 
                 bitString.Append(finalValueBits);
                 bitString.Append('0');
@@ -72,14 +67,14 @@ namespace SudokuService.Services
 
         private List<Token> TokenizeGrid(List<int> grid)
         {
-            if (grid.Count == 0)
-                return null; // TODO: Make this throw an exception
+            if (grid == null || grid.Count == 0)
+                throw new ArgumentException("The provided grid is either null or empty");
 
             var islands = new List<Token> { CreateIslandToken(grid[0], 0) };
 
             for (var index = 1; index < grid.Count; index++)
             {
-                var newestIsland = islands[^1];
+                var newestIsland = islands.Last();
 
                 if (newestIsland.Type == GetCellType(grid[index]))
                 {
@@ -116,6 +111,12 @@ namespace SudokuService.Services
         private static int GetNumBitsToStore(int size) => (int)Math.Ceiling(Math.Log2(size));
 
         private static String IntToBinaryString(int value) => Convert.ToString(value, 2);
+
+        private static int GetJumpBitSize(int index, int longestJumpBits)
+        {
+            var indexBits = GetNumBitsToStore(index);
+            return (indexBits < longestJumpBits) ? indexBits : longestJumpBits;
+        }
 
         private static String PadBinaryToSize(String binary, int size)
         {
