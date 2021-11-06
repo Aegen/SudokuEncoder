@@ -20,6 +20,7 @@ namespace SudokuService.Controllers
         [Route("/api/v1/sudoku/encode")]
         public ActionResult<EncodeResponseDTO> Encode(EncodeRequestDTO encodeRequestDTO)
         {
+            
             var binaryString = encoderService.EncodeGrid(encodeRequestDTO.grid);
             var code = Convert.ToBase64String(BinaryConversionUtil.GetBytes(binaryString));
 
@@ -27,11 +28,11 @@ namespace SudokuService.Controllers
             {
                 grid = encodeRequestDTO.grid,
                 binary = binaryString,
-                code = RemoveExtraCharacters(code, binaryString.Length)
+                code = TrimExtraCharacters(code, binaryString.Length)
             };
         }
 
-        public static String RemoveExtraCharacters(String code, int binaryStringLength)
+        public static String TrimExtraCharacters(String code, int binaryStringLength)
         {
             var neededLength = (int)Math.Ceiling(binaryStringLength / 6.0);
 
