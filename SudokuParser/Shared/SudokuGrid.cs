@@ -5,37 +5,51 @@ namespace SudokuService.Shared
 {
     public class SudokuGrid
     {
-        private List<List<int>> grid;
+        private List<List<int>> grid = new() { // TODO: This may not be necessary, I was just trying things to fix an IndexOutOfBoundsException
+            new List<int> { 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+            new List<int> { 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+            new List<int> { 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+            new List<int> { 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+            new List<int> { 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+            new List<int> { 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+            new List<int> { 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+            new List<int> { 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+            new List<int> { 0, 0, 0, 0, 0, 0, 0, 0, 0 }
+        };
+
+        // Sets for all 27 zones (rows, columns, and 3x3 regions) where the numbers [1-9] can only appear once
+        // Each set will contain all values that have already been placed in that zone
+        private readonly List<HashSet<int>> rows = InitializeZoneSets();
+        private readonly List<HashSet<int>> columns = InitializeZoneSets();
+        private readonly List<HashSet<int>> regions = InitializeZoneSets();
+
+        private static List<HashSet<int>> InitializeZoneSets() => new() { new HashSet<int>(), new HashSet<int>(), new HashSet<int>(), new HashSet<int>(), new HashSet<int>(), new HashSet<int>(), new HashSet<int>(), new HashSet<int>(), new HashSet<int>() };
 
         public SudokuGrid(List<int> grid)
         {
-            if (!ValidateRawGrid(grid))
-            {
+            if (!IsValidGrid(grid))
                 throw new ArgumentException("Grid was not valid");
-            }
-
-            var x = 0;
-            var y = 0;
 
             for(var i = 0; i < 81; i++)
             {
-                this.grid[x][y] = grid[i];
-
-                if (x < 9)
+                if (grid[i] != 0)
                 {
-                    x++;
-                }
-                else
-                {
-                    x = 0;
-                    y++;
+                    this.SetCellValue(i, grid[i]);
                 }
             }
         }
 
+        public SudokuGrid(){}
+
         public int GetCellValue(int x, int y)
         {
             return this.grid[x][y];
+        }
+
+        public int GetCellValue(int address)
+        {
+            var (x, y) = GetCoordinatesFromAddress(address);
+            return GetCellValue(x, y);
         }
 
         public void SetCellValue(int x, int y, int value)
@@ -43,52 +57,57 @@ namespace SudokuService.Shared
             if (value < 1 || value > 9)
                 throw new ArgumentOutOfRangeException(nameof(value), "Value must be in the range [1-9]");
 
+            this.columns[x].Add(value);
+            this.rows[y].Add(value);
+            var regionIndex = (y / 3 * 3) + (x / 3);
+            this.regions[regionIndex].Add(value);
+
             this.grid[x][y] = value;
+        }
+
+        public void SetCellValue(int address, int value)
+        {
+            var (x, y) = GetCoordinatesFromAddress(address);
+
+            SetCellValue(x, y, value);
         }
 
         public List<int> GetPossibleCellValues(int x, int y)
         {
-            var possibleValues = new List<int> { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+            var regionIndex = (y / 3 * 3) + (x / 3);
 
-            // Remove values from the same column and row
-            for(var i = 0; i < 9; i++)
-            {
-                if(this.grid[x][i] > 0)
-                {
-                    possibleValues.Remove(this.grid[x][i]);
-                }
+            var column = this.columns[x];
+            var row = this.rows[y];
+            var region = this.regions[regionIndex];
 
-                if (this.grid[i][y] > 0)
-                {
-                    possibleValues.Remove(this.grid[i][y]);
-                }
-            }
+            var possibleValues = new HashSet<int> { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 
-            // Remove values from the same 3x3 region
-            var localX = x - (x % 3);
-            var localY = y - (y % 3);
+            var remainingValues = RemoveSetsFromBaseSet(possibleValues, column, row, region);
 
-            for(var xMod = 0; xMod < 3; xMod++)
-            {
-                for (var yMod = 0; yMod < 3; yMod++)
-                {
-                    var cellValue = this.grid[localX + xMod][localY + yMod];
-                    if (cellValue > 0)
-                    {
-                        possibleValues.Remove(cellValue);
-                    }
-                }
-            }
-
-            return possibleValues;
+            return new List<int>(remainingValues);
         }
 
-        private static bool ValidateRawGrid(List<int> rawGrid)
+        public List<int> GetPossibleCellValues(int address)
+        {
+            var (x, y) = GetCoordinatesFromAddress(address);
+
+            return GetPossibleCellValues(x, y);
+        }
+
+        private static HashSet<int> RemoveSetsFromBaseSet(HashSet<int> baseSet, params HashSet<int>[] setsToRemove)
+        {
+            foreach (var set in setsToRemove)
+            {
+                baseSet.ExceptWith(set);
+            }
+
+            return baseSet;
+        }
+
+        private static bool IsValidGrid(List<int> rawGrid)
         {
             if(rawGrid.Count != 81)
-            {
                 return false;
-            }
 
             var validNumbers = new List<int> { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
             foreach(var cell in rawGrid)
@@ -98,6 +117,25 @@ namespace SudokuService.Shared
             }
 
             return true;
+        }
+
+        private static (int x, int y) GetCoordinatesFromAddress(int address)
+        {
+            if (address > 80 || address < 0)
+                throw new ArgumentOutOfRangeException(nameof(address), "Address must be in the range [0-80]");
+
+            return (address % 9, address / 9);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is SudokuGrid grid &&
+                   EqualityComparer<List<List<int>>>.Default.Equals(this.grid, grid.grid);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(grid);
         }
     }
 }

@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using SudokuService.Shared;
 
 namespace SudokuService.Services
 {
     public class EncoderService
     {
-        public String EncodeGrid(List<int> grid)
+        public static String EncodeGrid(List<int> grid)
         {
             var tokens = TokenizeGrid(grid);
 
@@ -15,7 +16,7 @@ namespace SudokuService.Services
             var binaryStringBuilder = new StringBuilder();
 
             // Add max jump section
-            binaryStringBuilder.Append(PadBinaryToSize(IntToBinaryString(longestJumpBits), 3));
+            binaryStringBuilder.Append(BinaryUtils.LeftPadBinaryToSize(IntToBinaryString(longestJumpBits), 3));
 
             // Add chain bit for first value
             if (tokens[0].Type == CellTypeEnum.EMPTY)
@@ -34,29 +35,29 @@ namespace SudokuService.Services
             return binaryStringBuilder.ToString();
         }
 
-        private List<String> GetTokenBinaryStrings(List<Token> tokens, int longestJumpBits) => tokens.Select(token => TokenToBitString(token, longestJumpBits)).ToList();
+        private static List<String> GetTokenBinaryStrings(List<Token> tokens, int longestJumpBits) => tokens.Select(token => TokenToBitString(token, longestJumpBits)).ToList();
 
-        private String TokenToBitString(Token token, int longestJumpBits)
+        private static String TokenToBitString(Token token, int longestJumpBits)
         {
             var bitString = new StringBuilder();
             if (token.Type == CellTypeEnum.VALUE)
             {
                 for (var i = 0; i < token.Values.Count - 1; i++)
                 {
-                    var valueBits = PadBinaryToSize(IntToBinaryString(token.Values[i]), 4);
+                    var valueBits = BinaryUtils.LeftPadBinaryToSize(IntToBinaryString(token.Values[i]), 4);
 
                     bitString.Append(valueBits);
                     bitString.Append('1');
                 }
 
-                var finalValueBits = PadBinaryToSize(IntToBinaryString(token.Values.Last()), 4);
+                var finalValueBits = BinaryUtils.LeftPadBinaryToSize(IntToBinaryString(token.Values.Last()), 4);
 
                 bitString.Append(finalValueBits);
                 bitString.Append('0');
             }
             else if (token.Type == CellTypeEnum.EMPTY)
             {
-                var valueBits = PadBinaryToSize(IntToBinaryString(token.Length - 1), longestJumpBits);
+                var valueBits = BinaryUtils.LeftPadBinaryToSize(IntToBinaryString(token.Length - 1), longestJumpBits);
                 bitString.Append(valueBits);
             }
 
@@ -65,7 +66,7 @@ namespace SudokuService.Services
 
 
 
-        private List<Token> TokenizeGrid(List<int> grid)
+        private static List<Token> TokenizeGrid(List<int> grid)
         {
             if (grid == null || grid.Count == 0)
                 throw new ArgumentException("The provided grid is either null or empty");
@@ -116,19 +117,6 @@ namespace SudokuService.Services
         {
             var indexBits = GetNumBitsToStore(index);
             return (indexBits < longestJumpBits) ? indexBits : longestJumpBits;
-        }
-
-        private static String PadBinaryToSize(String binary, int size)
-        {
-            if (binary.Length > size)
-                throw new ArgumentOutOfRangeException(nameof(size), "The requested size is smaller than the input length");
-
-            if (binary.Length == size)
-                return binary;
-
-            var difference = size - binary.Length;
-
-            return new string('0', difference) + binary;
         }
     }
 }
