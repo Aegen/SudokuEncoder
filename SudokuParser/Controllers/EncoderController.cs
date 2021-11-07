@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using SudokuService.Controllers.Utilities;
 using SudokuService.DTOs.Requests;
 using SudokuService.DTOs.Responses;
 using SudokuService.Services;
@@ -17,7 +16,7 @@ namespace SudokuService.Controllers
         public ActionResult<EncodeResponseDTO> Encode(EncodeRequestDTO encodeRequestDTO)
         {
             var binaryString = EncoderService.EncodeGrid(encodeRequestDTO.grid);
-            var code = Base64Converter.ConvertBinaryStringToBase64(binaryString);
+            var code = Base64Converter.FromBinary(binaryString);
 
             return new EncodeResponseDTO
             {

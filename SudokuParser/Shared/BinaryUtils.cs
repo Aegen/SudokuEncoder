@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace SudokuService.Shared
 {
@@ -16,13 +15,13 @@ namespace SudokuService.Shared
             {
                 var subStringLength = (bits.Length - startIndex > 6) ? 6 : bits.Length - startIndex;
 
-                bitStrings.Add(RightPadBinaryToSize(bits.Substring(startIndex, subStringLength), 6));
+                bitStrings.Add(RightPadToSize(bits.Substring(startIndex, subStringLength), 6));
             }
 
             return bitStrings;
         }
 
-        private static String RightPadBinaryToSize(String binary, int size)
+        private static String RightPadToSize(String binary, int size)
         {
             if (binary.Length > size)
                 throw new ArgumentOutOfRangeException(nameof(size), "The requested size is smaller than the input length");
@@ -35,7 +34,7 @@ namespace SudokuService.Shared
             return binary + new string('0', difference);
         }
 
-        public static String LeftPadBinaryToSize(String binary, int size)
+        public static String LeftPadToSize(String binary, int size)
         {
             if (binary.Length > size)
                 throw new ArgumentOutOfRangeException(nameof(size), "The requested size is smaller than the input length");
@@ -47,5 +46,9 @@ namespace SudokuService.Shared
 
             return new string('0', difference) + binary;
         }
+
+        public static int NumBitsToStore(int size) => (int)Math.Ceiling(Math.Log2(size));
+
+        public static String IntToBinary(int value) => Convert.ToString(value, 2);
     }
 }

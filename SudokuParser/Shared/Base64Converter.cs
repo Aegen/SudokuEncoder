@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using SudokuService.Shared;
 
-namespace SudokuService.Controllers.Utilities
+namespace SudokuService.Shared
 {
     public class Base64Converter
     {
@@ -142,12 +141,12 @@ namespace SudokuService.Controllers.Utilities
             {'/', "111111" }
         };
 
-        public static Char BinaryToBase64(String bits)
+        public static Char FromBinaryWord(String binary)
         {
-            if (!Regex.IsMatch(bits, "^[01]{6}$"))
-                throw new ArgumentException("Must contain 6 bits", nameof(bits));
+            if (!Regex.IsMatch(binary, "^[01]{6}$"))
+                throw new ArgumentException("Must contain 6 bits", nameof(binary));
 
-            return binaryToBase64Map[bits];
+            return binaryToBase64Map[binary];
         }
 
         private static readonly List<Char> validBase64Characters = new() { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/' };
@@ -166,7 +165,7 @@ namespace SudokuService.Controllers.Utilities
             return true;
         }
 
-        public static String Base64ToBinary(Char base64Char)
+        public static String ToBinary(Char base64Char)
         {
             if (!IsBase64(base64Char.ToString()))
                 throw new ArgumentException("Must be a valid base64 character", nameof(base64Char));
@@ -174,23 +173,23 @@ namespace SudokuService.Controllers.Utilities
             return base64ToBinaryMap[base64Char];
         }
 
-        public static String ConvertBinaryStringToBase64(String binaryString)
+        public static String FromBinary(String binary)
         {
-            if (!Regex.IsMatch(binaryString, "^[01]+$"))
-                throw new ArgumentException("Must be composed of only 1s and 0s", nameof(binaryString));
+            if (!Regex.IsMatch(binary, "^[01]+$"))
+                throw new ArgumentException("Must be composed of only 1s and 0s", nameof(binary));
 
-            var binaryStrings = BinaryUtils.SplitInto6BitStrings(binaryString);
-            var individualBase64Chars = binaryStrings.Select(binary => BinaryToBase64(binary)).ToArray();
+            var binaryStrings = BinaryUtils.SplitInto6BitStrings(binary);
+            var individualBase64Chars = binaryStrings.Select(bin => FromBinaryWord(bin)).ToArray();
 
             return String.Join("", individualBase64Chars);
         }
 
-        public static String ConvertBase64ToBinaryString(String base64String)
+        public static String ToBinary(String base64String)
         {
             if (!IsBase64(base64String))
                 throw new ArgumentException("Must be a base64 string", nameof(base64String));
 
-            var binaryStrings = base64String.ToCharArray().Select(character => Base64ToBinary(character)).ToArray();
+            var binaryStrings = base64String.ToCharArray().Select(character => ToBinary(character)).ToArray();
 
             return String.Join("", binaryStrings);
         }

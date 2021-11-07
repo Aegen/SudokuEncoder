@@ -13,7 +13,6 @@
     <None Remove="Services\" />
     <None Remove="Constants\" />
     <None Remove="Services\Resources\" />
-    <None Remove="Controllers\Utilities\" />
     <None Remove="Shared\" />
   </ItemGroup>
   <ItemGroup>
@@ -23,7 +22,6 @@
     <Folder Include="Services\" />
     <Folder Include="Constants\" />
     <Folder Include="Services\Resources\" />
-    <Folder Include="Controllers\Utilities\" />
     <Folder Include="Shared\" />
   </ItemGroup>
   <ItemGroup>
