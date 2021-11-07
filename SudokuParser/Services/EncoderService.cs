@@ -35,30 +35,66 @@ namespace SudokuService.Services
             return binaryStringBuilder.ToString();
         }
 
-        private static List<String> GetTokenBinaryStrings(List<Token> tokens, int longestJumpBits) => tokens.Select(token => TokenToBitString(token, longestJumpBits)).ToList();
+        private static List<String> GetTokenBinaryStrings(List<Token> tokens, int longestJumpBits)
+        {
+            var sudokuGrid = new SudokuGrid();
+            var address = 0;
+            var output = tokens.Select(token => TokenToBitString(token, longestJumpBits, ref sudokuGrid, ref address)).ToList();
+            return output;
+        }
 
-        private static String TokenToBitString(Token token, int longestJumpBits)
+        private static int FindValueIndex(List<int> possibleValue, int valueToFind)
+        {
+            for (var idx = 0; idx < possibleValue.Count; idx++)
+            {
+                if (possibleValue[idx] == valueToFind)
+                {
+                    return idx;
+                }
+            }
+
+            return -1;
+        }
+
+        private static String TokenToBitString(Token token, int longestJumpBits, ref SudokuGrid sudokuGrid, ref int address)
         {
             var bitString = new StringBuilder();
             if (token.Type == CellTypeEnum.VALUE)
             {
                 for (var i = 0; i < token.Values.Count - 1; i++)
                 {
-                    var valueBits = BinaryUtils.LeftPadBinaryToSize(IntToBinaryString(token.Values[i]), 4);
+                    var possibleValues = sudokuGrid.GetPossibleCellValues(address);
+                    var neededBits = GetNumBitsToStore(possibleValues.Count);
+                    var rawBits = IntToBinaryString(FindValueIndex(possibleValues, token.Values[i]));
+                    var valueBits = BinaryUtils.LeftPadBinaryToSize(
+                        rawBits,
+                        neededBits
+                        );
 
                     bitString.Append(valueBits);
                     bitString.Append('1');
+                    sudokuGrid.SetCellValue(address, token.Values[i]);
+                    address++;
                 }
 
-                var finalValueBits = BinaryUtils.LeftPadBinaryToSize(IntToBinaryString(token.Values.Last()), 4);
+                var finalPossibleValues = sudokuGrid.GetPossibleCellValues(address);
+                var finalNeededBits = GetNumBitsToStore(finalPossibleValues.Count);
+                var finalRawBits = IntToBinaryString(FindValueIndex(finalPossibleValues, token.Values.Last()));
+                var finalValueBits = BinaryUtils.LeftPadBinaryToSize(
+                    finalRawBits,
+                    finalNeededBits
+                    );
 
                 bitString.Append(finalValueBits);
                 bitString.Append('0');
+                sudokuGrid.SetCellValue(address, token.Values.Last());
+                address++;
             }
             else if (token.Type == CellTypeEnum.EMPTY)
             {
                 var valueBits = BinaryUtils.LeftPadBinaryToSize(IntToBinaryString(token.Length - 1), longestJumpBits);
                 bitString.Append(valueBits);
+                address += token.Length;
             }
 
             return bitString.ToString();

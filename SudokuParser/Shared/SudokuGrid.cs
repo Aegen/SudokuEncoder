@@ -72,6 +72,23 @@ namespace SudokuService.Shared
             SetCellValue(x, y, value);
         }
 
+        public bool SetCellByIndex(int x, int y, int index)
+        {
+            var possibleValues = GetPossibleCellValues(x, y);
+
+            if(possibleValues.Count-1 > index || index < 0)
+                return false;
+
+            this.SetCellValue(x, y, possibleValues[index]);
+            return true;
+        }
+
+        public void SetCellByIndex(int address, int index)
+        {
+            var (x, y) = GetCoordinatesFromAddress(address);
+            SetCellByIndex(x, y, index);
+        }
+
         public List<int> GetPossibleCellValues(int x, int y)
         {
             var regionIndex = (y / 3 * 3) + (x / 3);
