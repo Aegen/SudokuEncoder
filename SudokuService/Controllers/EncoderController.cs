@@ -4,8 +4,6 @@ using SudokuService.DTOs.Responses;
 using SudokuService.Services;
 using SudokuService.Shared;
 
-// For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-
 namespace SudokuService.Controllers
 {
     [ApiController]
