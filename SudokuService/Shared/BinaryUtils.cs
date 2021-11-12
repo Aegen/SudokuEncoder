@@ -11,7 +11,7 @@ namespace SudokuService.Shared
         {
             var bitStrings = new List<String>();
 
-            for(var startIndex = 0; startIndex < bits.Length; startIndex += 6)
+            for (var startIndex = 0; startIndex < bits.Length; startIndex += 6)
             {
                 var subStringLength = (bits.Length - startIndex > 6) ? 6 : bits.Length - startIndex;
 
@@ -21,7 +21,7 @@ namespace SudokuService.Shared
             return bitStrings;
         }
 
-        private static String RightPadToSize(String binary, int size)
+        public static String RightPadToSize(String binary, int size)
         {
             if (binary.Length > size)
                 throw new ArgumentOutOfRangeException(nameof(size), "The requested size is smaller than the input length");
@@ -47,7 +47,13 @@ namespace SudokuService.Shared
             return new string('0', difference) + binary;
         }
 
-        public static int NumBitsToStore(int size) => (int)Math.Ceiling(Math.Log2(size));
+        public static int NumBitsToStore(int size)
+        {
+            if (size == 0)
+                return 0;
+
+            return (int)Math.Ceiling(Math.Log2(size));
+        }
 
         public static String IntToBinary(int value) => Convert.ToString(value, 2);
     }

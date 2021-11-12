@@ -10,7 +10,7 @@ namespace SudokuService.Services
     {
         public static String EncodeGrid(List<int> grid)
         {
-            var tokens = TokenizeGrid(grid);
+            var tokens = TokenUtils.TokenizeGrid(grid);
 
             var maxJumpBitsNeeded = GetLongestJumpBits(tokens);
             var binaryStringBuilder = new StringBuilder();
@@ -79,50 +79,12 @@ namespace SudokuService.Services
             return bitString.ToString();
         }
 
-        private static List<Token> TokenizeGrid(List<int> grid)
-        {
-            if (grid == null || grid.Count == 0)
-                throw new ArgumentException("The provided grid is either null or empty", nameof(grid));
-
-            var tokens = new List<Token> { CreateIslandToken(grid[0], 0) };
-
-            for (var index = 1; index < grid.Count; index++)
-            {
-                var newestIsland = tokens.Last();
-
-                if (newestIsland.Type == GetCellType(grid[index]))
-                {
-                    newestIsland.Values.Add(grid[index]);
-                    newestIsland.Length++;
-                }
-                else
-                {
-                    tokens.Add(CreateIslandToken(grid[index], index));
-                }
-            }
-
-            return tokens;
-        }
-
-        private static Token CreateIslandToken(int cellValue, int index)
-        {
-            return new Token
-            {
-                StartIndex = index,
-                Length = 1,
-                Values = new List<int> { cellValue },
-                Type = GetCellType(cellValue)
-            };
-        }
-
-        private static CellTypeEnum GetCellType(int cellValue) => (cellValue == 0) ? CellTypeEnum.EMPTY : CellTypeEnum.VALUE;
-
         private static int GetLongestJumpBits(List<Token> tokens) => tokens
                 .Where(token => token.Type == CellTypeEnum.EMPTY)
                 .Select(token => BinaryUtils.NumBitsToStore(token.Length))
                 .Max();
 
-        public static int GetJumpBitsPerSchedule(int address, int maxJumpBits)
+        private static int GetJumpBitsPerSchedule(int address, int maxJumpBits)
         {
             var indexBits = BinaryUtils.NumBitsToStore(81 - address);
             return (indexBits < maxJumpBits) ? indexBits : maxJumpBits;
