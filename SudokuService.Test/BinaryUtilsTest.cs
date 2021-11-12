@@ -174,7 +174,7 @@ namespace SudokuService.Test
         }
 
         /*
-         *  IntToBinaryString
+         *  IntToBinary
          */
 
         [Fact]
