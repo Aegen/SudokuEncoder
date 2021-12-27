@@ -11,16 +11,13 @@ namespace SudokuService.Services
         public static String EncodeGrid(List<int> grid)
         {
             var tokens = TokenUtils.TokenizeGrid(grid);
-
             var maxJumpBitsNeeded = GetLongestJumpBits(tokens);
+
             var binaryStringBuilder = new StringBuilder();
 
-            // Add max jump section
-            binaryStringBuilder.Append(BinaryUtils.LeftPadToSize(BinaryUtils.IntToBinary(maxJumpBitsNeeded), 3));
+            binaryStringBuilder.Append(MaxJumpSection(maxJumpBitsNeeded));
 
-            // Add initial bit for whether the first cell has a value in it
-            var initialValueBit = (tokens.First().Type == CellTypeEnum.EMPTY) ? '0' : '1';
-            binaryStringBuilder.Append(initialValueBit);
+            binaryStringBuilder.Append(InitialChainBitSection(tokens));
 
             var tokenBinaryStrings = GetTokenBinaryStrings(tokens, maxJumpBitsNeeded);
 
@@ -28,6 +25,10 @@ namespace SudokuService.Services
 
             return binaryStringBuilder.ToString();
         }
+
+        private static String MaxJumpSection(int bitsNeeded) => BinaryUtils.LeftPadToSize(BinaryUtils.IntToBinary(bitsNeeded), 3);
+
+        private static String InitialChainBitSection(List<Token> tokens) =>(tokens.First().Type == CellTypeEnum.EMPTY) ? "0" : "1";
 
         private static List<String> GetTokenBinaryStrings(List<Token> tokens, int maxJumpBits)
         {
@@ -71,7 +72,7 @@ namespace SudokuService.Services
             else if (token.Type == CellTypeEnum.EMPTY && token.StartIndex != 80)
             {
                 var rawBits = BinaryUtils.IntToBinary(token.Length - 1);
-                var neededBitCount = GetJumpBitsPerSchedule(token.StartIndex, maxJumpBits);
+                var neededBitCount = GridUtils.GetJumpBitsPerSchedule(token.StartIndex, maxJumpBits);
                 var valueBits = BinaryUtils.LeftPadToSize(rawBits, neededBitCount);
                 bitString.Append(valueBits);
             }
@@ -83,11 +84,5 @@ namespace SudokuService.Services
                 .Where(token => token.Type == CellTypeEnum.EMPTY)
                 .Select(token => BinaryUtils.NumBitsToStore(token.Length))
                 .Max();
-
-        private static int GetJumpBitsPerSchedule(int address, int maxJumpBits)
-        {
-            var indexBits = BinaryUtils.NumBitsToStore(81 - address);
-            return (indexBits < maxJumpBits) ? indexBits : maxJumpBits;
-        }
     }
 }

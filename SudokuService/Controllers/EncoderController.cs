@@ -18,9 +18,9 @@ namespace SudokuService.Controllers
 
             return new EncodeResponseDTO
             {
-                grid = encodeRequestDTO.grid,
-                binary = binaryString,
-                code = code
+                Grid = encodeRequestDTO.grid,
+                Binary = binaryString,
+                Code = code
             };
         }
     }
