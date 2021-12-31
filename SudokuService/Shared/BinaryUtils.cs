@@ -56,5 +56,36 @@ namespace SudokuService.Shared
         }
 
         public static String IntToBinary(int value) => Convert.ToString(value, 2);
+
+        public static int BinaryToInt(string binary)
+        {
+            var multiplier = 1;
+            var value = 0;
+
+            for(int idx = binary.Length - 1; idx >= 0; idx--)
+            {
+                var intValue = Convert.ToInt32(binary[idx].ToString());
+
+                value += (intValue * multiplier);
+
+                multiplier *= 2;
+            }
+
+            return value;
+        }
+
+        public static (string head, string tail) ClipHead(string binary, int bitsToClip)
+        {
+            if (bitsToClip < binary.Length)
+            {
+                return (
+                    binary.Substring(0, bitsToClip),
+                    binary.Substring(bitsToClip));
+            }
+            else
+            {
+                return (binary, "");
+            }
+        }
     }
 }
