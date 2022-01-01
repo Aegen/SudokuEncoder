@@ -10,7 +10,7 @@ namespace SudokuService.Services
         {
             var bitsUsed = 0;
             var remainingBits = binary;
-            var bits = "";
+            string bits;
 
             // Max Jump Section
             (bits, remainingBits) = BinaryUtils.ClipHead(remainingBits, 3);
@@ -57,11 +57,6 @@ namespace SudokuService.Services
                 Binary = binary.Substring(0, bitsUsed),
                 Grid = sudokuGrid.Get1DGrid()
             };
-        }
-
-        public void GetNext()
-        {
-            
         }
     }
 }
